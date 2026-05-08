@@ -1,0 +1,57 @@
+-- Configuration pour la branche `main` de nvim-treesitter (Neovim 0.12+).
+-- Doc officielle : https://github.com/nvim-treesitter/nvim-treesitter
+--
+-- Pré-requis système :
+--   - tree-sitter CLI >= 0.26.1 (installé dans ~/.local/bin)
+--   - gcc (compile chaque parser)
+--
+-- L'API a totalement changé par rapport à master : plus de .configs.setup{},
+-- on déclare l'install_dir, on installe les parsers, on active la coloration
+-- via une autocmd FileType.
+return {
+  "nvim-treesitter/nvim-treesitter",
+  branch = "main",
+  lazy = false,        -- la doc précise que ce plugin ne supporte pas le lazy-loading
+  build = ":TSUpdate", -- met à jour les parsers lors d'un :Lazy update
+  config = function()
+    require("nvim-treesitter").setup({
+      install_dir = vim.fn.stdpath("data") .. "/site",
+    })
+
+    -- Parsers à installer / maintenir
+    local parsers = {
+      "bash",
+      "dockerfile",
+      "gitignore",
+      "html",
+      "javascript",
+      "json",
+      "lua",
+      "markdown",
+      "markdown_inline",
+      "python",
+      "rst",
+      "rust",
+      "toml",
+      "tsx",
+      "typescript",
+      "vim",
+      "vimdoc",
+      "yaml",
+    }
+
+    -- Installation asynchrone des parsers manquants au démarrage
+    require("nvim-treesitter").install(parsers)
+
+    -- Active la coloration treesitter + l'indentation pour ces filetypes
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = parsers,
+      callback = function(args)
+        -- Coloration syntaxique
+        pcall(vim.treesitter.start, args.buf)
+        -- Indentation améliorée par treesitter (expérimentale mais fonctionnelle)
+        vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      end,
+    })
+  end,
+}

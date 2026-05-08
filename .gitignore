@@ -1,0 +1,14 @@
+# Cache local de spell-check (téléchargé à la volée)
+spell/
+
+# Sessions et undo (locaux à la machine)
+sessions/
+shada/
+
+# Fichiers temporaires d'éditeur
+*.swp
+*.swo
+.DS_Store
+
+# Logs éventuels
+*.log
