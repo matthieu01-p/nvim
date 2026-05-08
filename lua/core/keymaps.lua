@@ -7,6 +7,32 @@ local keymap = vim.keymap.set
 -- on utilise ;; pour sortir du monde insertion
 keymap("i", ";;", "<ESC>", { desc = "Sortir du mode insertion avec ;;" })
 
+-- Quand on sauvegarde un .gitignore, rafraîchit automatiquement gitsigns
+-- et nvim-tree pour que les signes/couleurs reflètent les nouvelles règles
+-- d'ignore (sinon il faut redémarrer nvim).
+vim.api.nvim_create_autocmd("BufWritePost", {
+  pattern = { ".gitignore", "**/.gitignore" },
+  callback = function()
+    pcall(vim.cmd, "Gitsigns refresh")
+    pcall(function()
+      require("nvim-tree.api").tree.reload()
+    end)
+    vim.notify(".gitignore mis à jour : gitsigns + nvim-tree rafraîchis")
+  end,
+  desc = "Refresh gitsigns/nvim-tree quand .gitignore change",
+})
+
+-- Activer le wrap uniquement pour JSON et JSONL (lignes souvent très
+-- longues, et l'indentation n'est pas significative comme en Python).
+-- Ailleurs on garde wrap=false (défini dans options.lua).
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "json", "jsonl" },
+  callback = function()
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true -- coupe sur les espaces, pas en plein milieu d'un mot
+  end,
+})
+
 -- Vérifie si le fichier a été modifié à l'extérieur de nvim et recharge
 -- (couplé à autoread). Sans ces autocmds, autoread ne se déclenche que
 -- rarement et on rate les modifs de Claude / formatters / git checkout.
@@ -23,9 +49,34 @@ vim.api.nvim_create_autocmd("FileChangedShellPost", {
 })
 
 -- Double Esc pour sortir du mode terminal (sinon il faut faire <C-\><C-n>)
--- Utile pour reprendre la main sur nvim quand on est dans un :terminal
--- ou dans le panneau Claude.
 keymap("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Sortir du mode terminal" })
+
+-- Navigation entre fenêtres directement depuis un buffer terminal :
+-- en une frappe, on sort du mode terminal ET on change de fenêtre.
+-- Évite la séquence <Esc><Esc> + <C-l> + retour qui décale le curseur.
+keymap("t", "<C-h>", "<C-\\><C-n><C-w>h", { desc = "Fenêtre de gauche depuis le terminal" })
+keymap("t", "<C-j>", "<C-\\><C-n><C-w>j", { desc = "Fenêtre du bas depuis le terminal" })
+keymap("t", "<C-k>", "<C-\\><C-n><C-w>k", { desc = "Fenêtre du haut depuis le terminal" })
+keymap("t", "<C-l>", "<C-\\><C-n><C-w>l", { desc = "Fenêtre de droite depuis le terminal" })
+
+-- Quand on (re)rentre dans un buffer terminal, on repasse automatiquement
+-- en mode insertion : le curseur saute pile sur la zone de frappe au lieu
+-- de rester figé à sa dernière position en mode normal.
+-- vim.schedule différé pour que la fenêtre soit complètement prête (sinon
+-- le startinsert est avalé quand <leader>ac re-toggle la fenêtre).
+vim.api.nvim_create_autocmd({ "BufEnter", "WinEnter" }, {
+  pattern = "*",
+  callback = function()
+    if vim.bo.buftype == "terminal" then
+      vim.schedule(function()
+        if vim.bo.buftype == "terminal" then
+          vim.cmd("startinsert")
+        end
+      end)
+    end
+  end,
+  desc = "Auto-insertion dans les buffers terminal",
+})
 
 -- on efface le surlignage de la recherche
 keymap("n", "<leader>/", ":nohl<CR>", { desc = "Effacer le surlignage de la recherche" })
@@ -134,8 +185,8 @@ keymap("n", "<C-j>", "<C-w>j", { desc = "Déplace le curseur dans la fenêtre du
 keymap("n", "<C-k>", "<C-w>k", { desc = "Déplace le curseur dans la fenêtre du haut" })
 keymap("n", "<C-l>", "<C-w>l", { desc = "Déplace le curseur dans la fenêtre droite" })
 
--- Couper la ligne au curseur (inverse de J qui joint les lignes)
-keymap("n", "<leader>j", "i<CR><Esc>", { desc = "Couper la ligne au curseur" })
+-- Couper la ligne au curseur (inverse de J natif qui joint les lignes)
+keymap("n", "<leader>J", "i<CR><Esc>", { desc = "Couper la ligne au curseur" })
 
 -- Navigation entre les buffers
 keymap("n", "<S-l>", ":bnext<CR>", opts)
