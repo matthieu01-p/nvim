@@ -29,7 +29,11 @@ return {
       presets = {
         bottom_search = true,         -- use a classic bottom cmdline for search
         command_palette = true,       -- position the cmdline and popupmenu together
-        long_message_to_split = true, -- long messages will be sent to a split
+        -- Désactivé : redirigeait la sortie de :! et autres messages
+        -- longs dans un split éphémère qui disparaissait avant qu'on
+        -- ait le temps de lire. Les messages reviennent en bas comme avant.
+        -- Pour voir les anciens : :messages. Pour lancer un shell, :terminal.
+        long_message_to_split = false,
         inc_rename = false,           -- enables an input dialog for inc-rename.nvim
         lsp_doc_border = false,       -- add a border to hover docs and signature help
       },

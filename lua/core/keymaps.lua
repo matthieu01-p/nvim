@@ -25,11 +25,18 @@ vim.api.nvim_create_autocmd("BufWritePost", {
 -- Activer le wrap uniquement pour JSON et JSONL (lignes souvent très
 -- longues, et l'indentation n'est pas significative comme en Python).
 -- Ailleurs on garde wrap=false (défini dans options.lua).
+-- On active aussi le folding treesitter pour pouvoir replier/déplier
+-- chaque objet et array avec za / zc / zo / zR / zM.
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "json", "jsonl" },
   callback = function()
     vim.opt_local.wrap = true
     vim.opt_local.linebreak = true -- coupe sur les espaces, pas en plein milieu d'un mot
+    -- Folding via treesitter (granularité sémantique : objets, arrays, etc.)
+    vim.opt_local.foldmethod = "expr"
+    vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+    vim.opt_local.foldenable = true
+    vim.opt_local.foldlevel = 99 -- tout déplié au démarrage, on plie à la demande
   end,
 })
 

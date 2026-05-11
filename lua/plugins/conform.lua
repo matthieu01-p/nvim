@@ -15,7 +15,11 @@ return {
         liquid = { "prettier" },
         lua = { "stylua" },
         markdown = { "prettier" },
-        python = { "ruff_fix", "ruff_format" },
+        -- ruff_fix corrige les erreurs de lint (imports inutilisés, etc.) au save.
+        -- ruff_format est désactivé : il reformatait la présentation (longueur
+        -- de ligne, retours) ce qui était gênant. Pour formater à la main,
+        -- utiliser <leader>mp ou <leader>F.
+        python = { "ruff_fix" },
         rust = { "rustfmt" },
         svelte = { "prettier" },
         javascript = { "prettier" },

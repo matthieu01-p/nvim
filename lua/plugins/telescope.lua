@@ -11,6 +11,8 @@ return {
     -- fzf implémentation en C pour plus de rapidité
     { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
     "nvim-tree/nvim-web-devicons",
+    -- live_grep avec arguments rg (mot exact, sensible casse, types, etc.)
+    "nvim-telescope/telescope-live-grep-args.nvim",
   },
   config = function()
     local telescope = require("telescope")
@@ -25,6 +27,20 @@ return {
         path_display = { "smart" },
         file_ignore_patterns = { ".git/", "node_modules" },
 
+        -- Args ripgrep utilisés par live_grep, grep_string, etc.
+        -- --smart-case : insensible si query tout en minuscules,
+        -- sensible si une majuscule apparaît (donc "Candidate" ne
+        -- matche que Candidate, pas candidate ou Candidates).
+        vimgrep_arguments = {
+          "rg",
+          "--color=never",
+          "--no-heading",
+          "--with-filename",
+          "--line-number",
+          "--column",
+          "--smart-case",
+        },
+
         mappings = {
           i = {
             ["<C-j>"] = actions.move_selection_next,
@@ -32,9 +48,15 @@ return {
           },
         },
       },
+      extensions = {
+        live_grep_args = {
+          auto_quoting = true,
+        },
+      },
     })
 
     telescope.load_extension("fzf")
+    telescope.load_extension("live_grep_args")
 
     -- set keymaps
     local keymap = vim.keymap -- for conciseness
@@ -45,11 +67,21 @@ return {
       "<cmd>Telescope find_files<cr>",
       { desc = "Recherche de chaînes de caractères dans les noms de fichiers" }
     )
+    -- Live grep classique : preview surlignée, smart-case (Candidate avec
+    -- C majuscule est traité case-sensitive, candidate est insensible).
     keymap.set(
       "n",
       "<leader>fg",
       "<cmd>Telescope live_grep<cr>",
-      { desc = "Recherche de chaînes de caractères dans le contenu des fichiers" }
+      { desc = "Live grep (smart-case, preview surlignée)" }
+    )
+    -- Live grep avec args ripgrep : utiliser "pattern" -ws pour flags.
+    -- Preview surlignage moins propre mais permet flags arbitraires.
+    keymap.set(
+      "n",
+      "<leader>fG",
+      function() require("telescope").extensions.live_grep_args.live_grep_args() end,
+      { desc = "Live grep avec args rg (\"pattern\" -ws -t py ...)" }
     )
     keymap.set(
       "n",
