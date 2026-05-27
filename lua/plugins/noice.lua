@@ -17,6 +17,11 @@ return {
     local noice = require("noice")
 
     noice.setup({
+      -- Désactive les popups de notifications en haut à droite.
+      -- Les messages restent accessibles via :messages.
+      notify = {
+        enabled = false,
+      },
       lsp = {
         -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
         override = {
@@ -38,5 +43,18 @@ return {
         lsp_doc_border = false,       -- add a border to hover docs and signature help
       },
     })
+
+    -- Renvoie vim.notify dans la zone des messages plutôt que dans un popup
+    -- flottant. nvim-notify est chargé par noice et écrase vim.notify ; on le
+    -- restaure après coup. Les notifications restent consultables via :messages.
+    vim.notify = function(msg, level, _)
+      local hl = "Normal"
+      if level == vim.log.levels.ERROR then
+        hl = "ErrorMsg"
+      elseif level == vim.log.levels.WARN then
+        hl = "WarningMsg"
+      end
+      vim.api.nvim_echo({ { tostring(msg), hl } }, true, {})
+    end
   end,
 }

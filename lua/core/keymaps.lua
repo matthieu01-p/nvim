@@ -7,6 +7,42 @@ local keymap = vim.keymap.set
 -- on utilise ;; pour sortir du monde insertion
 keymap("i", ";;", "<ESC>", { desc = "Sortir du mode insertion avec ;;" })
 
+-- Requête SQL DuckDB sur le fichier CSV/JSON/Parquet courant.
+-- Tape ta requête en utilisant `t` comme nom de table (DuckDB lit
+-- automatiquement le fichier). Résultat dans un nouveau buffer.
+keymap("n", "<leader>sq", function()
+  local file = vim.fn.expand("%:p")
+  if file == "" then
+    vim.notify("Aucun fichier dans le buffer courant", vim.log.levels.WARN)
+    return
+  end
+  local ext = file:match("%.(%w+)$") or ""
+  local reader
+  if ext == "csv" or ext == "tsv" then
+    reader = string.format("read_csv_auto('%s')", file)
+  elseif ext == "json" or ext == "jsonl" then
+    reader = string.format("read_json_auto('%s')", file)
+  elseif ext == "parquet" then
+    reader = string.format("'%s'", file)
+  else
+    vim.notify("Type non supporté : ." .. ext, vim.log.levels.ERROR)
+    return
+  end
+  local query = vim.fn.input({ prompt = "SQL (t = table) : ", cancelreturn = "__CANCEL__" })
+  if query == "__CANCEL__" or query == "" then return end
+  -- Remplace `t` par le reader DuckDB
+  query = query:gsub("([%s,])t([%s,])", "%1" .. reader .. "%2")
+                :gsub("FROM%s+t%f[%W]", "FROM " .. reader)
+                :gsub("from%s+t%f[%W]", "from " .. reader)
+  -- -csv : sortie CSV (pas de troncature à 40 lignes comme le mode box).
+  -- On peut ainsi voir tous les résultats et même les enregistrer.
+  vim.cmd("vnew")
+  vim.cmd("0read !duckdb -csv -c " .. vim.fn.shellescape(query))
+  vim.bo.buftype = "nofile"
+  vim.bo.bufhidden = "wipe"
+  vim.bo.filetype = "csv"
+end, { desc = "DuckDB SQL sur le fichier courant (t = table)" })
+
 -- Quand on sauvegarde un .gitignore, rafraîchit automatiquement gitsigns
 -- et nvim-tree pour que les signes/couleurs reflètent les nouvelles règles
 -- d'ignore (sinon il faut redémarrer nvim).
@@ -175,6 +211,12 @@ keymap(nx, "<leader>ec", function() ts_jump_to_enclosing_end("class") end, { des
 -- Indenter / désindenter en visuel sans perdre la sélection (gv = re-select last visual)
 keymap("v", ">", ">gv", { desc = "Indenter et garder la sélection" })
 keymap("v", "<", "<gv", { desc = "Désindenter et garder la sélection" })
+
+-- En mode visuel, p colle SANS écraser le presse-papier avec le texte
+-- remplacé (qui est envoyé dans le black hole register "_).
+-- Permet de coller la même chose plusieurs fois d'affilée.
+keymap("x", "p", '"_dP', { desc = "Coller sans yanker le texte remplacé" })
+keymap("x", "P", '"_dP', { desc = "Coller sans yanker le texte remplacé" })
 
 -- K déplace le texte sélectionné vers le haut en mode visuel (activé avec v)
 keymap("v", "<S-k>", ":m .-2<CR>==", { desc = "Déplace le texte sélectionné vers le haut en mode visuel" })

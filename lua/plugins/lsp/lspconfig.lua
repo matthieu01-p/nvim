@@ -34,6 +34,23 @@ return {
       desc = "Définition dans split vertical",
       mode = "n",
     },
+    {
+      "<leader>gR",
+      function()
+        local params = vim.lsp.util.make_position_params(0, "utf-8")
+        params.context = { includeDeclaration = true }
+        vim.lsp.buf_request(0, "textDocument/references", params, function(err, result)
+          if err or not result or vim.tbl_isempty(result) then
+            vim.notify("Aucune référence trouvée", vim.log.levels.INFO)
+            return
+          end
+          vim.cmd("vsplit")
+          vim.cmd("Telescope lsp_references")
+        end)
+      end,
+      desc = "Références dans split vertical",
+      mode = "n",
+    },
     { "gi", "<cmd>Telescope lsp_implementations<CR>", desc = "Show LSP implementations", mode = "n" },
     { "gt", "<cmd>Telescope lsp_type_definitions<CR>", desc = "Show LSP type definitions", mode = "n" },
     { "gs", vim.lsp.buf.signature_help, desc = "Show LSP signature help", mode = "n" },
@@ -101,6 +118,53 @@ return {
           },
         },
       },
+    })
+
+    -- pylsp : utilisé UNIQUEMENT pour les refactors Rope (inline variable,
+    -- extract method, etc.) exposés en code actions sur <leader>ca.
+    -- Tout le reste (completion, hover, definition, lint, format) est
+    -- désactivé pour ne pas faire doublon avec pyright + ruff.
+    -- Requiert l'installation du plugin pylsp-rope dans le venv Mason :
+    --   ~/.local/share/nvim/mason/packages/python-lsp-server/venv/bin/pip install pylsp-rope
+    vim.lsp.config("pylsp", {
+      settings = {
+        pylsp = {
+          plugins = {
+            -- Linters/formatters : off (ruff s'en charge)
+            pycodestyle = { enabled = false },
+            pyflakes = { enabled = false },
+            pylint = { enabled = false },
+            mccabe = { enabled = false },
+            flake8 = { enabled = false },
+            autopep8 = { enabled = false },
+            yapf = { enabled = false },
+            black = { enabled = false },
+            -- Jedi : off (pyright s'en charge)
+            jedi_completion = { enabled = false },
+            jedi_definition = { enabled = false },
+            jedi_hover = { enabled = false },
+            jedi_references = { enabled = false },
+            jedi_signature_help = { enabled = false },
+            jedi_symbols = { enabled = false },
+            rope_completion = { enabled = false },
+            rope_autoimport = { enabled = false },
+            -- Le seul qu'on garde : les code actions de refactoring Rope
+            pylsp_rope = { enabled = true },
+          },
+        },
+      },
+      on_attach = function(client, _)
+        -- Ceinture + bretelles : on coupe aussi côté client les capacités
+        -- qui pourraient encore polluer pyright (hover, goto, etc.)
+        client.server_capabilities.hoverProvider = false
+        client.server_capabilities.definitionProvider = false
+        client.server_capabilities.referencesProvider = false
+        client.server_capabilities.documentSymbolProvider = false
+        client.server_capabilities.completionProvider = nil
+        client.server_capabilities.signatureHelpProvider = nil
+        client.server_capabilities.documentFormattingProvider = false
+        client.server_capabilities.documentRangeFormattingProvider = false
+      end,
     })
 
     vim.lsp.config("ruff", {

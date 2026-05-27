@@ -26,6 +26,7 @@ return {
         "lua_ls",      -- Lua (pour la config Neovim)
         "pyright",     -- Python (type checker + navigation)
         "ruff",        -- Linter/formatter Python
+        "pylsp",       -- Python (uniquement pour les refactors Rope : inline variable, extract, etc.)
         "jsonls",      -- JSON
         "yamlls",      -- YAML
         "marksman",    -- Markdown
