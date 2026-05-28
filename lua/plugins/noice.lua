@@ -22,6 +22,12 @@ return {
       notify = {
         enabled = false,
       },
+      -- Désactive le routage des messages Vim (et messages LSP en echomsg)
+      -- vers la mini-popup flottante en haut à droite. Les messages reviennent
+      -- en bas dans la zone cmdline d'origine.
+      messages = {
+        enabled = false,
+      },
       lsp = {
         -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
         override = {
