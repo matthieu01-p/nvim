@@ -49,8 +49,11 @@ return {
       callback = function(args)
         -- Coloration syntaxique
         pcall(vim.treesitter.start, args.buf)
-        -- Indentation améliorée par treesitter (expérimentale mais fonctionnelle)
-        vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        -- Indentation treesitter (branche main) DÉSACTIVÉE : expérimentale et
+        -- buggée, elle décale l'indentation d'un espace à chaque retour à la
+        -- ligne. On retombe sur l'indentation native (autoindent + indent
+        -- plugins du filetype), qui copie proprement la ligne précédente.
+        -- vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
       end,
     })
   end,

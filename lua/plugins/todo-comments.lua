@@ -16,6 +16,9 @@ return {
       todo_comments.jump_prev()
     end, { desc = "Previous todo comment" })
 
+    -- Liste tous les TODO/FIXME/HACK/… du projet dans Telescope.
+    keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Lister les TODO/FIXME (Telescope)" })
+
     todo_comments.setup()
   end,
 }

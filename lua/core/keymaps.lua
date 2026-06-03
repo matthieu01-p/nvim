@@ -218,15 +218,12 @@ keymap("v", "<", "<gv", { desc = "Désindenter et garder la sélection" })
 keymap("x", "p", '"_dP', { desc = "Coller sans yanker le texte remplacé" })
 keymap("x", "P", '"_dP', { desc = "Coller sans yanker le texte remplacé" })
 
--- K déplace le texte sélectionné vers le haut en mode visuel (activé avec v)
-keymap("v", "<S-k>", ":m .-2<CR>==", { desc = "Déplace le texte sélectionné vers le haut en mode visuel" })
--- J déplace le texte sélectionné vers le bas en mode visuel (activé avec v)
-keymap("v", "<S-j>", ":m .+1<CR>==", { desc = "Déplace le texte sélectionné vers le bas en mode visuel" })
-
--- K déplace le texte sélectionné vers le haut en mode visuel bloc (activé avec V)
-keymap("x", "<S-k>", ":move '<-2<CR>gv-gv", { desc = "Déplace le texte sélectionné vers le haut en mode visuel bloc" })
--- J déplace le texte sélectionné vers le bas en mode visuel (activé avec V)
-keymap("x", "<S-J>", ":move '>+1<CR>gv-gv", { desc = "Déplace le texte sélectionné vers le bas en mode visuel bloc" })
+-- Déplace la sélection visuelle vers le haut / bas. Mode "x" : couvre le
+-- visuel caractère, ligne ET bloc (inutile de doubler avec "v", qui inclurait
+-- aussi le mode select où ça n'a pas de sens).
+-- gv=gv : réétend la sélection (gv) puis la ré-indente (=) après le déplacement.
+keymap("x", "K", ":move '<-2<CR>gv=gv", { desc = "Déplacer la sélection vers le haut" })
+keymap("x", "J", ":move '>+1<CR>gv=gv", { desc = "Déplacer la sélection vers le bas" })
 
 -- Changement de fenêtre avec Ctrl + déplacement uniquement au lieu de Ctrl-w + déplacement
 keymap("n", "<C-h>", "<C-w>h", { desc = "Déplace le curseur dans la fenêtre de gauche" })
@@ -238,6 +235,6 @@ keymap("n", "<C-l>", "<C-w>l", { desc = "Déplace le curseur dans la fenêtre dr
 keymap("n", "<leader>J", "i<CR><Esc>", { desc = "Couper la ligne au curseur" })
 
 -- Navigation entre les buffers
-keymap("n", "<S-l>", ":bnext<CR>", opts)
-keymap("n", "<S-h>", ":bprevious<CR>", opts)
+keymap("n", "<S-l>", ":bnext<CR>", { desc = "Buffer suivant" })
+keymap("n", "<S-h>", ":bprevious<CR>", { desc = "Buffer précédent" })
 keymap("n", "<leader>bd", ":bp<bar>bd #<CR>", { desc = "Fermer le buffer sans fermer la fenêtre" })

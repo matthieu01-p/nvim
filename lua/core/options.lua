@@ -25,7 +25,7 @@ opt.cursorline = true -- surlignage de la ligne active
 
 -- termguicolors est nécessaire pour que les thèmes modernes fonctionnent
 opt.termguicolors = true
-opt.background = "light" -- dark ou light en fonction de votre préférence
+opt.background = "dark" -- cohérent avec le thème tokyonight-storm chargé (sombre)
 opt.signcolumn = "yes" -- affiche une colonne en plus à gauche pour afficher les signes (évite de décaler le texte)
 
 -- retour

@@ -63,7 +63,6 @@ return {
       -- sources pour l'autocompletion
       sources = cmp.config.sources({
         { name = "nvim_lsp" }, -- lsp
-        { name = "nvim_lua" },
         { name = "luasnip" },  -- snippets
         { name = "buffer" },   -- texte du buffer courant
         { name = "path" },     -- chemins dy système de fichier
@@ -81,7 +80,6 @@ return {
             nvim_lsp = "[LSP]",
             buffer = "[Buffer]",
             luasnip = "[LuaSnip]",
-            nvim_lua = "[Lua]",
             path = "[Path]",
             emoji = "[Emoji]",
           },
