@@ -49,6 +49,12 @@ return {
       callback = function(args)
         -- Coloration syntaxique
         pcall(vim.treesitter.start, args.buf)
+        -- Folding sémantique : treesitter découpe fonctions, classes, boucles,
+        -- conditions, etc. (foldlevelstart global = 99 → tout déplié à
+        -- l'ouverture, voir core/options.lua). On plie/déplie à la demande
+        -- avec za/zc/zo/zR/zM.
+        vim.wo.foldmethod = "expr"
+        vim.wo.foldexpr = "v:lua.vim.treesitter.foldexpr()"
         -- Indentation treesitter (branche main) DÉSACTIVÉE : expérimentale et
         -- buggée, elle décale l'indentation d'un espace à chaque retour à la
         -- ligne. On retombe sur l'indentation native (autoindent + indent

@@ -8,6 +8,7 @@
 --   - Replace  : le remplacement
 --   - Files Filter / Flags : restreindre (ex: *.py, ou -w pour mot entier)
 --   - <leader>r (dans le buffer) : appliquer tous les remplacements
+--     (redéfini ci-dessous ; la valeur par défaut de grug-far est <localleader>r)
 return {
   "MagicDuck/grug-far.nvim",
   cmd = { "GrugFar" },
@@ -31,5 +32,11 @@ return {
       desc = "Remplacer le mot sous le curseur (grug-far)",
     },
   },
-  opts = {},
+  opts = {
+    -- Touche plus pratique pour appliquer tous les remplacements depuis le
+    -- panneau (défaut grug-far : <localleader>r). On garde le reste par défaut.
+    keymaps = {
+      replace = { n = "<leader>r" },
+    },
+  },
 }

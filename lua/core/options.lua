@@ -3,6 +3,24 @@ local opt = vim.opt -- raccourci pour un peu plus de concision
 -- Mouse enable/disable
 opt.mouse = ""
 
+-- Kitty keyboard protocol : sous kitty, Neovim 0.12 active automatiquement
+-- l'encodage "CSI u" (en envoyant `CSI > 1 u` au démarrage, cf. :help tui-csiu).
+-- Effet de bord : dans nvim-tree/netrw, Entrée sur un dossier le déplie PUIS
+-- le replie aussitôt (double déclenchement). On dépile le mode poussé par
+-- Neovim pour revenir à l'encodage clavier classique.
+-- Ça n'affecte pas Ctrl+Tab : c'est kitty qui l'intercepte côté terminal.
+if vim.env.TERM == "xterm-kitty" or vim.env.KITTY_WINDOW_ID then
+  vim.api.nvim_create_autocmd("VimEnter", {
+    callback = function()
+      -- différé pour passer APRÈS la séquence d'activation de Neovim
+      vim.schedule(function()
+        io.write("\27[<u") -- CSI < u : pop des flags du kitty keyboard protocol
+        io.flush()
+      end)
+    end,
+  })
+end
+
 -- numéros de ligne
 opt.relativenumber = true -- affichage des numéros de ligne relatives à la position actuelle du curseur
 opt.number = true -- affiche le numéro absolu de la ligne active lorsque que relativenumber est activé
@@ -57,4 +75,12 @@ opt.undofile = true -- on autorise l'undo à l'infini (même quand on revient su
 -- affichage des caractères spéciaux
 opt.list = true
 opt.listchars:append({ nbsp = "␣", trail = "•", precedes = "«", extends = "»", tab = "> " })
+
+-- Folding : la granularité (fonction, classe, boucle, condition…) vient de
+-- treesitter, activé par buffer dans plugins/treesitter.lua. Ici on règle le
+-- comportement global et l'affichage.
+opt.foldlevelstart = 99 -- tout déplié à l'ouverture d'un fichier, on plie à la demande
+opt.foldenable = true
+opt.foldcolumn = "1" -- petite colonne à gauche qui indique où sont les replis
+opt.fillchars:append({ fold = " ", foldopen = "v", foldclose = ">", foldsep = " " })
 

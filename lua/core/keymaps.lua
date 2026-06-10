@@ -7,6 +7,13 @@ local keymap = vim.keymap.set
 -- on utilise ;; pour sortir du monde insertion
 keymap("i", ";;", "<ESC>", { desc = "Sortir du mode insertion avec ;;" })
 
+-- Folding (replis de code via treesitter, voir plugins/treesitter.lua).
+-- Touches natives : za = toggle le repli sous le curseur, zo/zc = ouvrir/fermer,
+-- zj/zk = saut au repli suivant/précédent. On ajoute juste de quoi tout
+-- ouvrir / tout fermer facilement (en doublon discoverable des zR/zM natifs).
+keymap("n", "<leader>za", "zR", { desc = "Folds : tout déplier" })
+keymap("n", "<leader>zm", "zM", { desc = "Folds : tout replier" })
+
 -- Requête SQL DuckDB sur le fichier CSV/JSON/Parquet courant.
 -- Tape ta requête en utilisant `t` comme nom de table (DuckDB lit
 -- automatiquement le fichier). Résultat dans un nouveau buffer.
@@ -225,11 +232,40 @@ keymap("x", "P", '"_dP', { desc = "Coller sans yanker le texte remplacé" })
 keymap("x", "K", ":move '<-2<CR>gv=gv", { desc = "Déplacer la sélection vers le haut" })
 keymap("x", "J", ":move '>+1<CR>gv=gv", { desc = "Déplacer la sélection vers le bas" })
 
--- Changement de fenêtre avec Ctrl + déplacement uniquement au lieu de Ctrl-w + déplacement
-keymap("n", "<C-h>", "<C-w>h", { desc = "Déplace le curseur dans la fenêtre de gauche" })
-keymap("n", "<C-j>", "<C-w>j", { desc = "Déplace le curseur dans la fenêtre du bas" })
-keymap("n", "<C-k>", "<C-w>k", { desc = "Déplace le curseur dans la fenêtre du haut" })
-keymap("n", "<C-l>", "<C-w>l", { desc = "Déplace le curseur dans la fenêtre droite" })
+-- Navigation entre fenêtres (<C-h/j/k/l>) : gérée par smart-splits.nvim
+-- (lua/plugins/smart-splits.lua), avec traversée tmux transparente.
+
+-- Gestion des splits sous le préfixe <leader>w (w = window)
+keymap("n", "<leader>wv", "<C-w>v", { desc = "Split vertical" })
+keymap("n", "<leader>ws", "<C-w>s", { desc = "Split horizontal" })
+keymap("n", "<leader>wq", "<C-w>q", { desc = "Fermer la fenêtre" })
+-- "only" maison : ferme les autres fenêtres SAUF l'explorateur nvim-tree
+-- (le <C-w>o natif fermerait aussi l'arbre, ce qui n'est pas voulu).
+keymap("n", "<leader>wo", function()
+  local cur = vim.api.nvim_get_current_win()
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if win ~= cur then
+      local buf = vim.api.nvim_win_get_buf(win)
+      local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+      if ft ~= "NvimTree" then
+        pcall(vim.api.nvim_win_close, win, false)
+      end
+    end
+  end
+end, { desc = "Fermer les autres fenêtres (garde l'explorateur)" })
+keymap("n", "<leader>w=", "<C-w>=", { desc = "Égaliser la taille des fenêtres" })
+
+-- Maximiser/restaurer la fenêtre courante (toggle). On mémorise la disposition
+-- via winrestcmd() pour pouvoir la rejouer telle quelle au retour.
+keymap("n", "<leader>wm", function()
+  if vim.t.maximized_restore_cmd then
+    vim.cmd(vim.t.maximized_restore_cmd)
+    vim.t.maximized_restore_cmd = nil
+  else
+    vim.t.maximized_restore_cmd = vim.fn.winrestcmd()
+    vim.cmd("resize | vertical resize")
+  end
+end, { desc = "Maximiser/restaurer la fenêtre (toggle)" })
 
 -- Couper la ligne au curseur (inverse de J natif qui joint les lignes)
 keymap("n", "<leader>J", "i<CR><Esc>", { desc = "Couper la ligne au curseur" })
