@@ -25,6 +25,28 @@ return {
         -- affiche le nom complet dans une popup flottante au survol.
         full_name = true,
         highlight_opened_files = "name", -- met en gras les fichiers ouverts
+        -- Colore le NOM du fichier selon son état git (vert stagé, rouge
+        -- modifié, etc.) en plus du symbole.
+        highlight_git = "name",
+        icons = {
+          git_placement = "after", -- symbole git APRÈS le nom (sinon "before"/"signcolumn"/"right_align")
+          show = {
+            git = true, -- afficher les symboles git (mettre false pour les masquer)
+          },
+          glyphs = {
+            -- Codes lettres à la lazygit (au lieu d'icônes). La couleur
+            -- (rouge=unstaged, vert=staged, etc.) vient de highlight_git.
+            git = {
+              untracked = "??", -- nouveau fichier (non suivi)
+              unstaged = "M", -- modifié, pas encore `git add`
+              staged = "A", -- stagé (`git add` fait)
+              renamed = "R", -- renommé
+              deleted = "D", -- supprimé
+              unmerged = "U", -- conflit de merge
+              ignored = "!!", -- ignoré (gitignore)
+            },
+          },
+        },
       },
     })
 
@@ -41,6 +63,31 @@ return {
     set_tree_cursorline()
     vim.api.nvim_create_autocmd("ColorScheme", {
       callback = set_tree_cursorline,
+    })
+
+    -- Couleurs des marqueurs git (lettre + nom du fichier). Palette distincte
+    -- et sans bleu, pour ne pas se fondre dans le texte bleu clair de base.
+    -- On colore les 3 groupes par état : *Icon (la lettre), GitFile*HL (le nom
+    -- de fichier), GitFolder*HL (les dossiers). Réappliqué sur ColorScheme.
+    local function set_tree_git_colors()
+      local colors = {
+        New = "#9ece6a", -- nouveau / untracked  (??)  → vert
+        Dirty = "#ff9e64", -- modifié / unstaged   (M)   → orange
+        Staged = "#73daca", -- stagé                (A)   → vert d'eau
+        Renamed = "#bb9af7", -- renommé              (R)   → violet
+        Deleted = "#f7768e", -- supprimé             (D)   → rouge
+        Merge = "#ff007c", -- conflit / unmerged   (U)   → magenta
+        Ignored = "#565f89", -- ignoré               (!!)  → gris
+      }
+      for name, fg in pairs(colors) do
+        vim.api.nvim_set_hl(0, "NvimTreeGit" .. name .. "Icon", { fg = fg })
+        vim.api.nvim_set_hl(0, "NvimTreeGitFile" .. name .. "HL", { fg = fg })
+        vim.api.nvim_set_hl(0, "NvimTreeGitFolder" .. name .. "HL", { fg = fg })
+      end
+    end
+    set_tree_git_colors()
+    vim.api.nvim_create_autocmd("ColorScheme", {
+      callback = set_tree_git_colors,
     })
 
     -- Le surlignage flashy n'apparaît que quand nvim-tree a le focus.

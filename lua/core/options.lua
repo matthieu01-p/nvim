@@ -84,3 +84,17 @@ opt.foldenable = true
 opt.foldcolumn = "1" -- petite colonne à gauche qui indique où sont les replis
 opt.fillchars:append({ fold = " ", foldopen = "v", foldclose = ">", foldsep = " " })
 
+-- Auto-activation d'un venv .venv présent dans le cwd, dans l'environnement de
+-- Neovim lui-même (PATH + VIRTUAL_ENV). Indépendant du shell de lancement, donc
+-- survit aux restore tmux (resurrect relance nvim sans venv activé).
+-- ponytail: ne cherche que ./.venv à la racine du cwd.
+local function activate_venv()
+  local venv = vim.fn.getcwd() .. "/.venv"
+  if vim.env.VIRTUAL_ENV ~= venv and vim.fn.isdirectory(venv .. "/bin") == 1 then
+    vim.env.VIRTUAL_ENV = venv
+    vim.env.PATH = venv .. "/bin:" .. vim.env.PATH
+  end
+end
+activate_venv()
+vim.api.nvim_create_autocmd("DirChanged", { callback = activate_venv })
+

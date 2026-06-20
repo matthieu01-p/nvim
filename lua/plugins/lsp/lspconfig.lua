@@ -75,9 +75,17 @@ return {
     },
     { "K", vim.lsp.buf.hover, desc = "Show documentation for what is under cursor", mode = "n" },
     { "<leader>F", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", desc = "Format buffer", mode = { "n", "x" } },
-    { "<leader>rs", ":LspRestart<CR>", desc = "Restart LSP", mode = "n" },
+    -- Neovim 0.12+ : commande native (nvim-lspconfig n'enregistre plus :LspRestart)
+    { "<leader>rs", "<cmd>lsp restart<CR>", desc = "Restart LSP", mode = "n" },
   },
   config = function()
+    -- Capabilities enrichies par cmp-nvim-lsp (snippets serveur, auto-imports
+    -- via additionalTextEdits, résolution de la doc des items, etc.).
+    -- Appliquées à TOUS les serveurs via la config générique "*".
+    vim.lsp.config("*", {
+      capabilities = require("cmp_nvim_lsp").default_capabilities(),
+    })
+
     -- Customize error signs
     vim.diagnostic.config({
       signs = {

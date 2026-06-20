@@ -18,6 +18,16 @@ return {
       install_dir = vim.fn.stdpath("data") .. "/site",
     })
 
+    -- Détection de filetype Jinja. Neovim reconnaît déjà `.jinja` comme `jinja`,
+    -- mais pas `.j2` / `.jinja2` : on les mappe sur le même filetype pour
+    -- bénéficier du parser treesitter `jinja` ci-dessous.
+    vim.filetype.add({
+      extension = {
+        j2 = "jinja",
+        jinja2 = "jinja",
+      },
+    })
+
     -- Parsers à installer / maintenir
     local parsers = {
       "bash",
@@ -25,6 +35,8 @@ return {
       "gitignore",
       "html",
       "javascript",
+      "jinja",
+      "jinja_inline",
       "json",
       "lua",
       "markdown",
