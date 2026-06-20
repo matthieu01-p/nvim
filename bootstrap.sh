@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Réinstalle les dépendances système de cette config Neovim sur un nouveau PC.
+# Usage : cloner le repo dans ~/.config/nvim puis lancer ./bootstrap.sh
+# (lazy.nvim + les plugins s'installent tout seuls au 1er lancement de nvim)
+set -euo pipefail
+
+# Outils via apt (compilation parsers, telescope, LSP node, etc.)
+sudo apt update
+sudo apt install -y git curl gcc unzip ripgrep fd-find nodejs npm
+
+mkdir -p ~/.local/bin
+
+# fd : apt l'installe sous le nom `fdfind` ; telescope cherche `fd`
+[ -e ~/.local/bin/fd ] || ln -s "$(command -v fdfind)" ~/.local/bin/fd
+
+# Neovim (tarball officiel nightly) -> /opt/nvim, symlink dans /usr/local/bin
+if ! command -v nvim >/dev/null; then
+  curl -fsSL https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz -o /tmp/nvim.tar.gz
+  sudo rm -rf /opt/nvim
+  sudo tar -C /opt -xzf /tmp/nvim.tar.gz
+  sudo mv /opt/nvim-linux-x86_64 /opt/nvim
+  sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+fi
+
+# tree-sitter CLI (>=0.26.1) -> ~/.local/bin (apt est trop vieux)
+if ! command -v tree-sitter >/dev/null; then
+  curl -fsSL https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-x64.gz -o /tmp/ts.gz
+  gunzip -f /tmp/ts.gz && install -m755 /tmp/ts ~/.local/bin/tree-sitter
+fi
+
+echo "OK — lance 'nvim' : lazy.nvim et les plugins s'installeront automatiquement."
