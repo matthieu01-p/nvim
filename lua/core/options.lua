@@ -98,3 +98,9 @@ end
 activate_venv()
 vim.api.nvim_create_autocmd("DirChanged", { callback = activate_venv })
 
+-- Socket RPC pour piloter nvim depuis l'extérieur (mcp-neovim-server : Claude
+-- dans un pane tmux lit les buffers / la sélection et édite ici via MCP).
+-- ponytail: chemin fixe unique ; une 2e instance nvim échoue à bind (pcall
+-- l'ignore) et le MCP reste branché sur la 1re. Suffit pour un éditeur unique.
+pcall(vim.fn.serverstart, "/tmp/nvim.sock")
+
