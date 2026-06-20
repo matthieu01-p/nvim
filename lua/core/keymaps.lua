@@ -180,7 +180,7 @@ local function ts_jump(direction, type_pattern)
 end
 
 -- Fin du node englobant (fonction ou classe qui contient le curseur).
--- Pratique combiné au mode visuel : `V<leader>ef` sélectionne du curseur
+-- Pratique combiné au mode visuel : `V<leader>Ef` sélectionne du curseur
 -- jusqu'à la fin de la fonction courante.
 local function ts_jump_to_enclosing_end(type_pattern)
   local ok = pcall(vim.treesitter.get_parser, 0)
@@ -212,8 +212,8 @@ keymap(nx, "<leader>nf", function() ts_jump("next", "function") end, { desc = "F
 keymap(nx, "<leader>Nf", function() ts_jump("prev", "function") end, { desc = "Fonction précédente" })
 keymap(nx, "<leader>nc", function() ts_jump("next", "class") end, { desc = "Classe suivante" })
 keymap(nx, "<leader>Nc", function() ts_jump("prev", "class") end, { desc = "Classe précédente" })
-keymap(nx, "<leader>ef", function() ts_jump_to_enclosing_end("function") end, { desc = "Fin de la fonction courante" })
-keymap(nx, "<leader>ec", function() ts_jump_to_enclosing_end("class") end, { desc = "Fin de la classe courante" })
+keymap(nx, "<leader>Ef", function() ts_jump_to_enclosing_end("function") end, { desc = "Fin de la fonction courante" })
+keymap(nx, "<leader>Ec", function() ts_jump_to_enclosing_end("class") end, { desc = "Fin de la classe courante" })
 
 -- Indenter / désindenter en visuel sans perdre la sélection (gv = re-select last visual)
 keymap("v", ">", ">gv", { desc = "Indenter et garder la sélection" })
