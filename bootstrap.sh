@@ -30,4 +30,11 @@ if ! command -v tree-sitter >/dev/null; then
   gunzip -f /tmp/ts.gz && install -m755 /tmp/ts ~/.local/bin/tree-sitter
 fi
 
+# lazygit -> ~/.local/bin (requis par lazygit.nvim, absent d'apt sur Ubuntu)
+if ! command -v lazygit >/dev/null; then
+  lg_ver=$(curl -fsSL https://api.github.com/repos/jesseduffield/lazygit/releases/latest | grep -oP '"tag_name": "v\K[^"]+')
+  curl -fsSL "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${lg_ver}_Linux_x86_64.tar.gz" -o /tmp/lazygit.tar.gz
+  tar -xzf /tmp/lazygit.tar.gz -C ~/.local/bin lazygit && chmod +x ~/.local/bin/lazygit
+fi
+
 echo "OK — lance 'nvim' : lazy.nvim et les plugins s'installeront automatiquement."
