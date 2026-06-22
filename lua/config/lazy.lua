@@ -25,6 +25,9 @@ require("lazy").setup({ { import = "plugins" }, {import = "plugins.lsp"} }, {
   },
   -- thème utilisé lors de l'installation de plugins
   install = { colorscheme = { "tokyonight" } },
+  -- image.nvim déclare un rockspec (magick), mais on utilise le processeur
+  -- "magick_cli" (binaire ImageMagick) -> pas besoin de luarocks/hererocks.
+  rocks = { enabled = false },
   -- désactive la pénible notification au démarrage
   change_detection = {
     notify = false,

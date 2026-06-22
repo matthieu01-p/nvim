@@ -1,5 +1,15 @@
 local opt = vim.opt -- raccourci pour un peu plus de concision
 
+-- Python hôte de Neovim (provider + remote plugins comme molten-nvim).
+-- Venv dédié et FIXE : il contient toujours pynvim + jupyter_client, peu importe
+-- le projet ouvert. Indispensable car activate_venv() (plus bas) prépend le
+-- ./.venv du projet au PATH, qui lui n'a pas forcément ces paquets.
+-- Recréé par bootstrap.sh. Les kernels Jupyter, eux, vivent dans les venvs projet.
+local nvim_python = vim.fn.expand("~/.local/share/nvim-host-venv/bin/python")
+if vim.fn.executable(nvim_python) == 1 then
+  vim.g.python3_host_prog = nvim_python
+end
+
 -- Mouse enable/disable
 opt.mouse = ""
 

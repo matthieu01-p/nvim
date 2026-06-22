@@ -37,4 +37,21 @@ if ! command -v lazygit >/dev/null; then
   tar -xzf /tmp/lazygit.tar.gz -C ~/.local/bin lazygit && chmod +x ~/.local/bin/lazygit
 fi
 
+# --- Support notebooks .ipynb (jupytext + molten) ---
+# ImageMagick : requis par image.nvim (processeur magick_cli) pour les plots inline
+sudo apt install -y imagemagick python3-venv
+
+# Venv hôte FIXE de Neovim : pynvim + jupyter_client pour molten, + jupytext.
+# Pointé par vim.g.python3_host_prog (cf. lua/core/options.lua).
+NVIM_VENV="$HOME/.local/share/nvim-host-venv"
+if [ ! -d "$NVIM_VENV" ]; then python3 -m venv "$NVIM_VENV"; fi
+"$NVIM_VENV/bin/pip" install -q --upgrade pip
+"$NVIM_VENV/bin/pip" install -q pynvim jupyter_client jupytext ipykernel nbformat cairosvg pillow
+# jupytext.nvim appelle `jupytext` en dur depuis le PATH -> symlink vers le venv hôte
+ln -sf "$NVIM_VENV/bin/jupytext" ~/.local/bin/jupytext
+# Enregistre molten comme remote plugin (sinon :Molten* indisponibles)
+nvim --headless "+UpdateRemotePlugins" +qa 2>/dev/null || true
+
 echo "OK — lance 'nvim' : lazy.nvim et les plugins s'installeront automatiquement."
+echo "Notebooks : pour exécuter des cellules, installe ipykernel dans le venv du projet :"
+echo "  pip install ipykernel && python -m ipykernel install --user --name <projet>"
