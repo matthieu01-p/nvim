@@ -6,7 +6,9 @@ set -euo pipefail
 
 # Outils via apt (compilation parsers, telescope, LSP node, etc.)
 sudo apt update
-sudo apt install -y git curl gcc unzip ripgrep fd-find nodejs npm
+# nodejs/npm déjà fournis par NodeSource (node 24) -> on ne les réinstalle pas
+# (le paquet npm d'Ubuntu entre en conflit avec le nodejs NodeSource)
+sudo apt install -y git curl gcc unzip ripgrep fd-find
 
 mkdir -p ~/.local/bin
 
